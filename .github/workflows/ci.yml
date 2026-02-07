@@ -1,6 +1,9 @@
 name: Pure Python Pipeline
 
-on: [push]
+on:
+    push:
+        branches: ["main"]
+    workflow_dispatch:
 
 jobs:
     # 任务 1: 测试 (完全零依赖，速度极快)
