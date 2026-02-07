@@ -15,7 +15,7 @@ jobs:
 
             # ⚡️ UV 的魔法时刻：安装速度极快
             - name: Install uv
-              uses: 172.18.12.99:3000/test/setup-uv@v1
+              uses: http://172.18.12.99:3000/test/setup-uv@v1
               with:
                   enable-cache: true
                   cache-dependency-glob: "uv.lock"
