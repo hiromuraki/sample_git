@@ -48,7 +48,7 @@ jobs:
             - name: Login
               uses: docker/login-action@v3
               with:
-                  registry: ${{ vars.DOCKER_REGISTRY }}
+                  registry: ${{ vars.DOCKER_REGISTRY || 'ghrc.io' }}
                   username: ${{ github.actor }}
                   password: ${{ secrets.PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
 
