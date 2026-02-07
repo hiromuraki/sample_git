@@ -43,20 +43,13 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
 
-            # 登录步骤：自动适配当前平台的 Registry
             - name: Login to Registry
               uses: docker/login-action@v3
               with:
-                  # 在 GitHub 跑，它自动读到 "ghcr.io"
-                  # 在 Gitea 跑，它自动读到 "172.18.12.99:3000"
                   registry: ${{ vars.DOCKER_REGISTRY }}
-
                   username: ${{ github.actor }}
-                  # GitHub 跑就是 GITHUB_TOKEN
-                  # Gitea 跑就是 Gitea 的 Token
                   password: ${{ secrets.GITHUB_TOKEN }}
 
-            # 构建推送步骤
             - name: Build and push
               uses: docker/build-push-action@v5
               with:
