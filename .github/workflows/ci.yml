@@ -8,7 +8,7 @@ jobs:
         runs-on: ubuntu-latest
         # 直接使用 Python 官方镜像，避开 checkout Action 的 Node 依赖问题
         container:
-            image: python:3.13-slim
+            image: nikolaik/python-nodejs
 
         steps:
             # 1. 拉取代码 (使用 git 命令，甚至不需要 actions/checkout)
