@@ -1,4 +1,4 @@
-name: Pure Python Pipeline
+name: CI Test Pipeline
 
 on:
     push:
@@ -6,25 +6,23 @@ on:
     workflow_dispatch:
 
 jobs:
-    # 任务 1: 测试 (完全零依赖，速度极快)
+    # 任务 1: 测试
     test:
         runs-on: ubuntu-latest
-        # 直接使用 Python 官方镜像，避开 checkout Action 的 Node 依赖问题
         container:
-            image: nikolaik/python-nodejs
-
+            # 使用同时有 python 与 nodejs 环境的镜像（nodejs 是因为 actions/checkout 需要 node 环境执行）
+            # image: nikolaik/python-nodejs
+            image: python:3.14-slim
         steps:
-            # 1. 拉取代码 (使用 git 命令，甚至不需要 actions/checkout)
-            # 但为了方便，我们还是用 checkout@v4 (假设你已经镜像了它)
-            # 如果没有镜像，可以直接用 Gitea 内置的 clone 逻辑
+            # 1. 拉取代码
             - name: Checkout
               uses: actions/checkout@v4
 
-            # 2. 运行测试 (使用标准库，无需 pip install)
+            # 2. 运行测试
             - name: Run Unittest
-              run: python test_main.py
+              run: python3 test_main.py
 
-    # 任务 2: 构建并推送 (复用之前的优雅配置)
+    # 任务 2: 构建并推送 Docker 镜像
     build:
         needs: test
         runs-on: ubuntu-latest
@@ -32,10 +30,11 @@ jobs:
             packages: write
             contents: read
         steps:
+            # 1. 拉取代码
             - name: Checkout
               uses: actions/checkout@v4
 
-            # 使用 Docker Meta 生成标签 (优雅的小写转换)
+            # 2. 使用 Docker Meta 生成标签
             - name: Docker Meta
               id: meta
               uses: docker/metadata-action@v5
@@ -44,7 +43,7 @@ jobs:
                   images: ${{ vars.DOCKER_REGISTRY || 'ghcr.io' }}/${{ github.repository }}
                   tags: type=raw,value=latest
 
-            # 登录 Registry
+            # 3. 登录 Registry
             - name: Login
               uses: docker/login-action@v3
               with:
@@ -53,7 +52,7 @@ jobs:
                   # 引用密钥 secrets.PACKAGES_TOKEN，若为定义则使用 secrets.GITHUB_TOKEN
                   password: ${{ secrets.PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
 
-            # 构建并推送
+            # 4. 构建并推送
             - name: Build and Push
               uses: docker/build-push-action@v5
               with:
