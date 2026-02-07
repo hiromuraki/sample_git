@@ -41,7 +41,7 @@ jobs:
               uses: docker/metadata-action@v5
               with:
                   # 引用变量 vars.DOCKER_REGISTRY (记得在 Gitea 设置)
-                  images: ${{ vars.DOCKER_REGISTRY }}/${{ github.repository }}
+                  images: ${{ vars.DOCKER_REGISTRY || 'ghcr.io' }}/${{ github.repository }}
                   tags: type=raw,value=latest
 
             # 登录 Registry
