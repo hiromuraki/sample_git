@@ -10,7 +10,7 @@ jobs:
     test:
         runs-on: ubuntu-latest
         container:
-            image: python:3.13-bookworm
+            image: nikolaik/python-nodejs
 
         steps:
             - name: Checkout code
