@@ -5,6 +5,12 @@ on:
         branches: ["main"]
     workflow_dispatch:
 
+env:
+    # 引用变量 vars.DOCKER_REGISTRY，若为定义则使用 ghcr.io
+    DOCKER_REGISTRY: ${{ vars.DOCKER_REGISTRY || 'ghcr.io' }}
+    # 引用密钥 secrets.PACKAGES_TOKEN，若为定义则使用 secrets.GITHUB_TOKEN
+    REGISTRY_TOKEN: ${{ secrets.PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
+
 jobs:
     # 任务 1: 测试
     test:
@@ -38,18 +44,16 @@ jobs:
               id: meta
               uses: docker/metadata-action@v5
               with:
-                  # 引用变量 vars.DOCKER_REGISTRY，若为定义则使用 ghcr.io
-                  images: ${{ vars.DOCKER_REGISTRY || 'ghcr.io' }}/${{ github.repository }}
+                  images: ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}
                   tags: type=raw,value=latest
 
             # 3. 登录 Registry
             - name: Login
               uses: docker/login-action@v3
               with:
-                  registry: ${{ vars.DOCKER_REGISTRY || 'ghcr.io' }}
+                  registry: ${{ env.DOCKER_REGISTRY }}
                   username: ${{ github.actor }}
-                  # 引用密钥 secrets.PACKAGES_TOKEN，若为定义则使用 secrets.GITHUB_TOKEN
-                  password: ${{ secrets.PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
+                  password: ${{ env.REGISTRY_TOKEN }}
 
             # 4. 构建并推送
             - name: Build and Push
