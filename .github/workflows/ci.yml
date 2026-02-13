@@ -10,6 +10,9 @@ env:
     REGISTRY: ${{ vars.DOCKER_REGISTRY || 'ghcr.io' }}
     # 引用密钥 secrets.PACKAGES_TOKEN，若为定义则使用 secrets.GITHUB_TOKEN
     REGISTRY_TOKEN: ${{ secrets.PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
+    BUILDKITD_CONFIG_FILE: .github/${{ vars.BUILDKITD_CONFIG_FILE || 'buildkitd.toml' }}
+    FULL_IMAGE_NAME: ${{ vars.DOCKER_REGISTRY || 'ghcr.io'}}/${{ github.repository_owner }}/sample_git
+
 
 jobs:
     # 任务 1: 测试
@@ -27,7 +30,22 @@ jobs:
             - name: Run Unittest
               run: python3 test_main.py
 
-    # 任务 2: 构建并推送 Docker 镜像
+    # 任务2：构建含自签名证书的Buildkit
+    build-custom-buildkit-image:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Build Custom BuildKit Image
+              run: |
+                  docker build \
+                  -f .github/buildkit/Dockerfile \
+                  -t local/custom-buildkit:latest \
+
+    # 任务 3: 构建并推送 Docker 镜像
     build:
         needs: test
         runs-on: ubuntu-latest
@@ -39,13 +57,12 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4
 
-            # 2. 使用 Docker Meta 生成标签
-            - name: Docker Meta
-              id: meta
-              uses: docker/metadata-action@v5
+            # 2. 配置 Buildx
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
               with:
-                  images: ${{ env.REGISTRY }}/${{ github.repository }}
-                  tags: type=raw,value=latest
+                  driver-opts: image=local/custom-buildkit:latest
+                  buildkitd-config: ${{ env.BUILDKITD_CONFIG_FILE }}
 
             # 3. 登录 Registry
             - name: Login
@@ -55,10 +72,14 @@ jobs:
                   username: ${{ github.actor }}
                   password: ${{ env.REGISTRY_TOKEN }}
 
-            # 4. 构建并推送
-            - name: Build and Push
+
+            - name: Build and push (amd64)
               uses: docker/build-push-action@v5
               with:
                   context: .
+                  platforms: linux/amd64
                   push: true
-                  tags: ${{ steps.meta.outputs.tags }}
+                  tags: ${{ env.FULL_IMAGE_NAME }}:latest
+                  provenance: false
+                  cache-from: type=registry,ref=${{ env.FULL_IMAGE_NAME }}:buildcache-amd64
+                  cache-to: type=registry,ref=${{ env.FULL_IMAGE_NAME }}:buildcache-amd64,mode=max  
