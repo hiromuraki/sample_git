@@ -3,3 +3,4 @@ mirrors = ["https://docker.1ms.run"]
 
 [registry."10.8.0.201:3000"]
 http = true
+insecure = true
