@@ -2,4 +2,4 @@
 mirrors = ["https://docker.1ms.run"]
 
 [registry."git.service.home"]
-insecure = true
+ca = ["/usr/local/share/ca-certificates/my-ca.crt"]
