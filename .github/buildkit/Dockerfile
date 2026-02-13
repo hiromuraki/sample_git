@@ -1,4 +1,4 @@
-FROM moby/buildkit:latest
+FROM moby/buildkit:buildx-stable-1
 
 RUN apk add --no-cache ca-certificates
 
