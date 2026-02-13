@@ -71,7 +71,8 @@ jobs:
                   registry: ${{ env.REGISTRY }}
                   username: ${{ github.actor }}
                   password: ${{ env.REGISTRY_TOKEN }}
-
+            
+            # 4. 构建并推送
             - name: Build and push (amd64)
               uses: docker/build-push-action@v5
               with:
