@@ -63,7 +63,7 @@ jobs:
               with:
                   driver-opts: image=local/custom-buildkit:latest
                   buildkitd-config: ${{ env.BUILDKITD_CONFIG_FILE }}
-
+            
             # 3. 登录 Registry
             - name: Login
               uses: docker/login-action@v3
