@@ -1,3 +1,5 @@
+insecure-entitlements=["network.host", "security.insecure"]
+
 [registry."docker.io"]
 mirrors = ["https://docker.1ms.run"]
 
