@@ -28,7 +28,6 @@ jobs:
             # 2. 运行测试
             - name: Run Unittest
               run: python3 test_main.py
-                  .
 
     # 任务 2: 构建并推送 Docker 镜像
     build:
