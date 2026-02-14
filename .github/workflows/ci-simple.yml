@@ -1,0 +1,59 @@
+name: CI Test Pipeline
+
+on:
+    push:
+        branches: ["main"]
+    workflow_dispatch:
+
+env:
+    # 引用变量 vars.DOCKER_REGISTRY，若未定义则使用 ghcr.io
+    REGISTRY: ${{ vars.DOCKER_REGISTRY || 'ghcr.io' }}
+    # 引用密钥 secrets.PACKAGES_TOKEN，若未定义则使用 secrets.GITHUB_TOKEN
+    REGISTRY_TOKEN: ${{ secrets.PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
+    # 【已移除】BUILDKITD_CONFIG_FILE 变量，不再需要
+    FULL_IMAGE_NAME: ${{ vars.DOCKER_REGISTRY || 'ghcr.io'}}/${{ github.repository_owner }}/sample_git
+
+jobs:
+    # 任务 1: 测试
+    test:
+        runs-on: ubuntu-latest
+        container:
+            # 使用同时有 python 与 nodejs 环境的镜像 (nodejs 是因为 actions/checkout 需要 node 环境执行)
+            image: nikolaik/python-nodejs
+        steps:
+            # 1. 拉取代码
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            # 2. 运行测试
+            - name: Run Unittest
+              run: python3 test_main.py
+
+    # 任务 2: 构建并推送 Docker 镜像
+    build:
+        runs-on: ubuntu-latest
+        needs: [test]
+        permissions:
+            packages: write
+            contents: read
+        steps:
+            # 1. 拉取代码
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            # 2. 登录 Registry (依赖宿主机 Docker Daemon 的配置)
+            - name: Login
+              uses: docker/login-action@v3
+              with:
+                  registry: ${{ env.REGISTRY }}
+                  username: ${{ github.actor }}
+                  password: ${{ env.REGISTRY_TOKEN }}
+
+            # 3. 构建并推送
+            - name: Build and push
+              run: |
+                  # 构建镜像
+                  docker build -t ${{ env.FULL_IMAGE_NAME }}:latest .
+
+                  # 推送镜像
+                  docker push ${{ env.FULL_IMAGE_NAME }}:latest
