@@ -4,4 +4,13 @@ insecure-entitlements=["network.host", "security.insecure"]
 mirrors = ["https://docker.1ms.run"]
 
 [registry."git.service.home"]
+http = true
+insecure = true
+
+[registry."git.service.home:80"]
+http = true
+insecure = true
+
+[registry."git.service.home:443"]
+http = true
 insecure = true
