@@ -9,7 +9,7 @@ env:
     # 引用变量 vars.DOCKER_REGISTRY，若未定义则使用 ghcr.io
     REGISTRY: ${{ vars.DOCKER_REGISTRY || 'ghcr.io' }}
     # 引用密钥 secrets.PACKAGES_TOKEN，若未定义则使用 secrets.GITHUB_TOKEN
-    REGISTRY_TOKEN: ${{ secrets.PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
+    REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN || secrets.GITHUB_TOKEN }}
     # 【已移除】BUILDKITD_CONFIG_FILE 变量，不再需要
     FULL_IMAGE_NAME: ${{ vars.DOCKER_REGISTRY || 'ghcr.io'}}/${{ github.repository_owner }}/sample_git
 

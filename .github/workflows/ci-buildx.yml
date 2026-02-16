@@ -7,7 +7,7 @@ env:
     # 引用变量 vars.DOCKER_REGISTRY，若为定义则使用 ghcr.io
     REGISTRY: ${{ vars.DOCKER_REGISTRY || 'ghcr.io' }}
     # 引用密钥 secrets.PACKAGES_TOKEN，若为定义则使用 secrets.GITHUB_TOKEN
-    REGISTRY_TOKEN: ${{ secrets.PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
+    REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN || secrets.GITHUB_TOKEN }}
     BUILDKITD_CONFIG_FILE: .github/${{ vars.BUILDKITD_CONFIG_FILE || 'buildkitd.toml' }}
     FULL_IMAGE_NAME: ${{ vars.DOCKER_REGISTRY || 'ghcr.io'}}/${{ github.repository_owner }}/sample_git
 
@@ -26,7 +26,6 @@ jobs:
             # 2. 运行测试
             - name: Run Unittest
               run: python3 test_main.py
-
 
     # 任务 3: 构建并推送 Docker 镜像
     build:
@@ -63,4 +62,5 @@ jobs:
                   push: true
                   tags: ${{ env.FULL_IMAGE_NAME }}:latest
                   provenance: false
-            
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
