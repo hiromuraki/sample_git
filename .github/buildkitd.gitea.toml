@@ -1,5 +1,2 @@
 [registry."docker.io"]
 mirrors = ["https://docker.1ms.run"]
-
-[registry."gitea.home"]
-insecure = true
